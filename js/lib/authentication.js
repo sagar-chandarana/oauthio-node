@@ -18,8 +18,8 @@ module.exports = function(csrf_generator, cache, requestio) {
           url: cache.oauthd_url + cache.oauthd_base + '/refresh_token/' + credentials.provider,
           form: {
             token: credentials.refresh_token,
-            key: cache.public_key,
-            secret: cache.secret_key
+            key: session.public_key,
+            secret: session.secret_key
           }
         }, function(e, r, body) {
           var k;
@@ -74,10 +74,16 @@ module.exports = function(csrf_generator, cache, requestio) {
         return a.redirect(provider, session);
       }
       if (opts != null ? opts.code : void 0) {
-        return a.authenticate(opts.code, session);
+        if(opts.public_key && opts.secret_key) {
+        	return a.authenticate(opts.code, session, opts.public_key, opts.secret_key);
+        } else {
+  			defer.reject(new Error('App name and secret not present'));
+        }
       }
       if (opts != null ? opts.credentials : void 0) {
         a.refresh_tokens(opts.credentials, session, opts != null ? opts.force_refresh : void 0).then(function(credentials) {
+          credentials.public_key = session.public_key;
+          credentials.secret_key = session.secret_key;
           return defer.resolve(a.construct_request_object(credentials));
         });
         return defer.promise;
@@ -85,6 +91,8 @@ module.exports = function(csrf_generator, cache, requestio) {
       if ((!(opts != null ? opts.credentials : void 0)) && (!(opts != null ? opts.code : void 0))) {
         if (session.oauth[provider]) {
           a.refresh_tokens(session.oauth[provider], session, opts != null ? opts.force_refresh : void 0).then(function(credentials) {
+          	credentials.public_key = session.public_key;
+          	credentials.secret_key = session.secret_key;
             return defer.resolve(a.construct_request_object(credentials));
           });
         } else {
@@ -127,15 +135,17 @@ module.exports = function(csrf_generator, cache, requestio) {
       };
       return request_object;
     },
-    authenticate: function(code, session) {
+    authenticate: function(code, session, public_key, secret_key) {
       var defer;
       defer = Q.defer();
+      session.public_key = public_key;
+      session.secret_key = secret_key;
       request.post({
         url: cache.oauthd_url + cache.oauthd_base + '/access_token',
         form: {
           code: code,
-          key: cache.public_key,
-          secret: cache.secret_key
+          key: session.public_key,
+          secret: session.secret_key
         }
       }, function(e, r, body) {
         var response, _ref;
@@ -163,6 +173,8 @@ module.exports = function(csrf_generator, cache, requestio) {
         if (response.expires_in) {
           response.expires = new Date().getTime() + response.expires_in * 1000;
         }
+        response.public_key = session.public_key;
+        response.secret_key = session.secret_key;
         response = a.construct_request_object(response);
         if ((session != null)) {
           session.oauth = session.oauth || {};

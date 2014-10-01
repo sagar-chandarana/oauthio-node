@@ -28,7 +28,7 @@ module.exports = function(cache) {
       }
       headers = {
         oauthio: {
-          k: cache.public_key
+          k: r.public_key
         }
       };
       if (tokens.oauth_token && tokens.oauth_token_secret) {
@@ -100,7 +100,7 @@ module.exports = function(cache) {
       }
       headers = {
         oauthio: {
-          k: cache.public_key
+          k: r.public_key
         }
       };
       if (tokens.oauth_token && tokens.oauth_token_secret) {

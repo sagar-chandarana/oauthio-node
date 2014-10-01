@@ -10,10 +10,6 @@
     "name": "oauth.io"
   },
   "license": "Apache2",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/oauth-io/sdk-node.git"
-  },
   "devDependencies": {
     "grunt-concurrent": "^0.5.0",
     "grunt-contrib-uglify": "^0.4.0",
@@ -28,16 +24,7 @@
     "q": "^1.0.1",
     "request": "^2.34.0"
   },
-  "bugs": {
-    "url": "https://github.com/oauth-io/sdk-node/issues"
-  },
-  "homepage": "https://github.com/oauth-io/sdk-node",
   "_id": "oauthio@0.3.1",
-  "dist": {
-    "shasum": "9709abad6f209d3fe583beb895668b303e6c742b",
-    "tarball": "http://registry.npmjs.org/oauthio/-/oauthio-0.3.1.tgz"
-  },
-  "_from": "oauthio@^0.3.1",
   "_npmVersion": "1.4.3",
   "_npmUser": {
     "name": "webshell",
@@ -50,7 +37,5 @@
     }
   ],
   "directories": {},
-  "_shasum": "9709abad6f209d3fe583beb895668b303e6c742b",
-  "_resolved": "http://registry.npmjs.org/oauthio/-/oauthio-0.3.1.tgz",
   "readme": "ERROR: No README data found!"
 }
