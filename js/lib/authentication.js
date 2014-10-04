@@ -77,7 +77,7 @@ module.exports = function(csrf_generator, cache, requestio) {
         if(opts.public_key && opts.secret_key) {
         	return a.authenticate(opts.code, session, opts.public_key, opts.secret_key);
         } else {
-  			defer.reject(new Error('App name and secret not present'));
+  			defer.reject(('App name and secret not present'));
         }
       }
       if (opts != null ? opts.credentials : void 0) {
@@ -96,11 +96,11 @@ module.exports = function(csrf_generator, cache, requestio) {
             return defer.resolve(a.construct_request_object(credentials));
           });
         } else {
-          defer.reject(new Error('Cannot authenticate from session for provider \'' + provider + '\''));
+          defer.reject(('Cannot authenticate from session for provider \'' + provider + '\''));
         }
         return defer.promise;
       }
-      defer.reject(new Error('Could not authenticate, parameters are missing or wrong'));
+      defer.reject(('Could not authenticate, parameters are missing or wrong'));
       return defer.promise;
     },
     construct_request_object: function(credentials) {
@@ -157,18 +157,18 @@ module.exports = function(csrf_generator, cache, requestio) {
           response = JSON.parse(body);
         } catch (_error) {
           e = _error;
-          defer.reject(new Error('OAuth.io response could not be parsed'));
+          defer.reject('OAuth.io response could not be parsed');
           return;
         }
         if ((response.status != null) && response.status === 'error' && (response.message != null)) {
-          defer.reject(new Error('OAuth.io / oauthd responded with : ' + response.message));
+          defer.reject('OAuth.io / oauthd responded with : ' + response.message);
         }
         if (response.state == null) {
-          defer.reject(new Error('State is missing from response'));
+          defer.reject('State is missing from response');
           return;
         }
         if (((session != null ? session.csrf_tokens : void 0) == null) || (_ref = response.state, __indexOf.call(session.csrf_tokens, _ref) < 0)) {
-          defer.reject(new Error('State is not matching'));
+          defer.reject('State is not matching');
         }
         if (response.expires_in) {
           response.expires = new Date().getTime() + response.expires_in * 1000;
