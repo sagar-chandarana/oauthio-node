@@ -89,7 +89,7 @@ module.exports = function(csrf_generator, cache, requestio) {
         return defer.promise;
       }
       if ((!(opts != null ? opts.credentials : void 0)) && (!(opts != null ? opts.code : void 0))) {
-        if (session.oauth[provider]) {
+        if (session.oauth && session.oauth[provider]) {
           a.refresh_tokens(session.oauth[provider], session, opts != null ? opts.force_refresh : void 0).then(function(credentials) {
           	credentials.public_key = session.public_key;
           	credentials.secret_key = session.secret_key;

@@ -12,7 +12,7 @@ module.exports = function(cache) {
       var defer, get_options, headers, k, tokens;
       defer = Q.defer();
       if (r.error != null) {
-        defer.reject(new Error('Not authenticated for provider \'' + r.provider + '\''));
+        defer.reject('Not authenticated for provider \'' + r.provider + '\'');
         return defer.promise;
       }
       tokens = void 0;
@@ -72,7 +72,7 @@ module.exports = function(cache) {
           defer.resolve(response);
           return;
         } else {
-          defer.reject("An error occured while performing the request");
+          defer.reject({message: "An error occured while performing the request", fromOauthd: {status: r.statusCode, body: body}});
         }
         if (error) {
           return defer.reject(error);
@@ -84,7 +84,7 @@ module.exports = function(cache) {
       var body, defer, headers, k, options, tokens, url;
       defer = Q.defer();
       if (r.error != null) {
-        defer.reject(new Error('Not authenticated for provider \'' + r.provider + '\''));
+        defer.reject('Not authenticated for provider \'' + r.provider + '\'');
         return defer.promise;
       }
       tokens = void 0;
@@ -136,10 +136,8 @@ module.exports = function(cache) {
           }
           defer.resolve(response.data);
           return;
-        } else if (r.statusCode === 501) {
-          defer.reject(new Error(body));
-        } else {
-          defer.reject(new Error("An error occured while retrieving the user's information"));
+        } else { 
+          defer.reject({message: 'Error while retriving user information', fromOauthd: {status: r.statusCode, body: body}});
         }
         if (error) {
           return defer.reject(error);
