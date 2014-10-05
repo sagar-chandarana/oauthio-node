@@ -153,6 +153,11 @@ module.exports = function(csrf_generator, cache, requestio) {
           defer.reject(e);
           return;
         }
+        
+        if(r.statusCode !== 200) {
+        	return defer.reject('OAuth.io / oauthd responded with : ' + body);
+        }
+
         try {
           response = JSON.parse(body);
         } catch (_error) {
@@ -160,13 +165,11 @@ module.exports = function(csrf_generator, cache, requestio) {
           defer.reject('OAuth.io response could not be parsed');
           return;
         }
-        if ((response.status != null) && response.status === 'error' && (response.message != null)) {
-          defer.reject('OAuth.io / oauthd responded with : ' + response.message);
-        }
         if (response.state == null) {
           defer.reject('State is missing from response');
           return;
         }
+        
         if (((session != null ? session.csrf_tokens : void 0) == null) || (_ref = response.state, __indexOf.call(session.csrf_tokens, _ref) < 0)) {
           defer.reject('State is not matching');
         }
