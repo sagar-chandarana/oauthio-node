@@ -165,14 +165,7 @@ module.exports = function(csrf_generator, cache, requestio) {
           defer.reject('OAuth.io response could not be parsed');
           return;
         }
-        if (response.state == null) {
-          defer.reject('State is missing from response');
-          return;
-        }
         
-        if (((session != null ? session.csrf_tokens : void 0) == null) || (_ref = response.state, __indexOf.call(session.csrf_tokens, _ref) < 0)) {
-          defer.reject('State is not matching');
-        }
         if (response.expires_in) {
           response.expires = new Date().getTime() + response.expires_in * 1000;
         }
