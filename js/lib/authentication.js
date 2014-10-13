@@ -13,7 +13,7 @@ module.exports = function(csrf_generator, cache, requestio) {
       defer = Q.defer();
       credentials.refreshed = false;
       now = new Date();
-      if (((credentials.expires && now.getTime() > credentials.expires) || force)) {
+      if (credentials.expires  && (now.getTime() > credentials.expires || force)) {
         request.post({
           url: cache.oauthd_url + cache.oauthd_base + '/refresh_token/' + credentials.provider,
           form: {
