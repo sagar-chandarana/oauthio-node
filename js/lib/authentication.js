@@ -13,11 +13,11 @@ module.exports = function(csrf_generator, cache, requestio) {
       defer = Q.defer();
       credentials.refreshed = false;
       now = new Date();
-      if (credentials.refresh_token && ((credentials.expires && now.getTime() > credentials.expires) || force)) {
+      if (((credentials.expires && now.getTime() > credentials.expires) || force)) {
         request.post({
           url: cache.oauthd_url + cache.oauthd_base + '/refresh_token/' + credentials.provider,
           form: {
-            token: credentials.refresh_token,
+            token: credentials.refresh_token || credentials.access_token,
             key: session.public_key,
             secret: session.secret_key
           }
@@ -34,10 +34,14 @@ module.exports = function(csrf_generator, cache, requestio) {
                 e = _error;
                 defer.reject(e);
               }
-              if (typeof body === "object" && body.access_token && body.expires_in) {
-                credentials.expires = new Date().getTime() + body.expires_in * 1000;
-                for (k in body) {
-                  credentials[k] = body[k];
+              if(body.status !== "success") {
+                defer.reject(body);
+              }
+              
+              if (typeof body.data === "object" && (body.data.access_token || (body.data.oauth_token && body.data.oauth_token_secret)) && body.data.expires_in) {
+                credentials.expires = new Date().getTime() + body.data.expires_in * 1000;
+                for (k in body.data) {
+                  credentials[k] = body.data[k];
                 }
                 if ((session != null)) {
                   session.oauth = session.oauth || {};
@@ -47,7 +51,7 @@ module.exports = function(csrf_generator, cache, requestio) {
                 credentials.last_refresh = new Date().getTime();
                 return defer.resolve(credentials);
               } else {
-                return defer.resolve(credentials);
+                return defer.reject({"error": "unexpected credentials", "data": body.data});
               }
             }
           }
@@ -79,22 +83,27 @@ module.exports = function(csrf_generator, cache, requestio) {
         } else {
   			defer.reject(('App name and secret not present'));
         }
+        return defer.promise;
       }
       if (opts != null ? opts.credentials : void 0) {
-        a.refresh_tokens(opts.credentials, session, opts != null ? opts.force_refresh : void 0).then(function(credentials) {
+        a.refresh_tokens(opts.credentials, session, opts != null ? opts.force_refresh : void 0)
+        .then(function(credentials) {
           credentials.public_key = session.public_key;
           credentials.secret_key = session.secret_key;
           return defer.resolve(a.construct_request_object(credentials));
-        });
+        })
+        .fail(defer.reject);
         return defer.promise;
       }
       if ((!(opts != null ? opts.credentials : void 0)) && (!(opts != null ? opts.code : void 0))) {
         if (session.oauth && session.oauth[provider]) {
-          a.refresh_tokens(session.oauth[provider], session, opts != null ? opts.force_refresh : void 0).then(function(credentials) {
+          a.refresh_tokens(session.oauth[provider], session, opts != null ? opts.force_refresh : void 0)
+          .then(function(credentials) {
           	credentials.public_key = session.public_key;
           	credentials.secret_key = session.secret_key;
             return defer.resolve(a.construct_request_object(credentials));
-          });
+          })
+          .fail(defer.reject);
         } else {
           defer.reject(('Cannot authenticate from session for provider \'' + provider + '\''));
         }
