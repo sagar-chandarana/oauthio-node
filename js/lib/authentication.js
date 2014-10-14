@@ -30,18 +30,21 @@ module.exports = function(csrf_generator, cache, requestio) {
             if (typeof body === "string") {
               try {
                 body = JSON.parse(body);
+                if(body.status !== undefined) {
+                  if(body.status !== "success") {
+                    return defer.reject("error: non-success:" + JSON.stringify(body));
+                  } else {
+                    body = body.data;
+                  }
+                }
               } catch (_error) {
                 e = _error;
                 defer.reject(e);
               }
-              if(body.status !== "success") {
-                defer.reject(body);
-              }
-              
-              if (typeof body.data === "object" && (body.data.access_token || (body.data.oauth_token && body.data.oauth_token_secret)) && body.data.expires_in) {
-                credentials.expires = new Date().getTime() + body.data.expires_in * 1000;
-                for (k in body.data) {
-                  credentials[k] = body.data[k];
+              if (typeof body === "object" && (body.access_token || (body.oauth_token && body.oauth_token_secret)) && body.expires_in) {
+                credentials.expires = new Date().getTime() + body.expires_in * 1000;
+                for (k in body) {
+                  credentials[k] = body[k];
                 }
                 if ((session != null)) {
                   session.oauth = session.oauth || {};
@@ -51,7 +54,7 @@ module.exports = function(csrf_generator, cache, requestio) {
                 credentials.last_refresh = new Date().getTime();
                 return defer.resolve(credentials);
               } else {
-                return defer.reject({"error": "unexpected credentials", "data": body.data});
+                return defer.reject({"error": "unexpected credentials", "data": body});
               }
             }
           }
